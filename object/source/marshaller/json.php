@@ -12,29 +12,38 @@ namespace Components;
    *
    * @author evalcode.net
    */
+  // TODO Optimize & complete ...
   class Marshaller_Json extends Marshaller
   {
     /**
      * (non-PHPdoc)
      * @see Components.Marshaller::marshal()
      */
-    public function marshal(Serializable $object_)
+    public function marshal($object_)
     {
-      if($object_ instanceof Primitive)
+      if(Primitive::isNative(gettype($object_)))
+        return json_encode($object_);
+
+      if($object_ instanceof Value)
         return json_encode($object_->value());
 
       if($object_ instanceof Serializable_Json)
         return $object_->serializeJson();
 
       $type=get_class($object_);
-      $version=$object_->serialVersionUid();
 
-      $map=Cache::get('components/marshaller/json/'.md5($type)."/$version");
+      $values=array();
+      foreach($this->propertyMap($type) as $property=>$info)
+      {
+        if(Primitive::isNative($info['type']))
+          $values[$info['name']]=$object_->$property;
+        else if($object_->$property instanceof Value)
+          $values[$info['name']]=$object_->$property->value();
 
-      if(false===$map)
-        $map=$this->mapTypes($object_);
+        // TODO Deep mapping / map arrays/objects ...
+      }
 
-      return json_encode($object_);
+      return json_encode($values);
     }
 
     /**
@@ -43,8 +52,11 @@ namespace Components;
      */
     public function unmarshal($data_, $type_)
     {
+      if(Primitive::isNative($type_))
+        return json_decode($data_);
+
       $type=new \ReflectionClass($type_);
-      if($type->isSubclassOf('Components\\Primitive'))
+      if($type->isSubclassOf('Components\\Value'))
         return $type_::valueOf(json_decode($data_));
 
       if($type->isSubclassOf('Components\\Serializable_Json'))
@@ -54,60 +66,31 @@ namespace Components;
         return $instance->unserializeJson($data_);
       }
 
-      return json_decode($data_);
-    }
-    //--------------------------------------------------------------------------
+      $object=new $type_();
+      $data=json_decode($data_, true);
 
-
-    // IMPLEMENTATION
-    protected function mapTypes(Serializable $object_)
-    {
-      $annotations=Annotations::get(get_class($object_));
-
-      foreach($annotations->getPropertyAnnotations() as $propertyName=>$propertyAnnotations)
+      foreach($this->propertyMap($type_) as $property=>$info)
       {
-        $property=array();
-        foreach($propertyAnnotations as $annotation)
+        if(false===isset($data[$info['name']]))
+          continue;
+
+        $t=$info['type'];
+
+        if(Primitive::isNative($t))
         {
-          if($annotation instanceof Annotation_Type)
-          {
-            if(false===strpos($annotation->value, '|'))
-            {
-              $property['type']=$annotation->value;
-              if(Primitive::isNative($property['type']))
-                $property['type']=Primitive::asBoxed($property['type']);
-            }
-            else
-            {
-              $chunks=explode('|', $annotation->value);
-              if(HashMap::TYPE_NATIVE===Primitive::asNative(ltrim(reset($chunks), '\\')))
-              {
-                $property['type']=HashMap::TYPE;
-                $property['inner']=ltrim(end($chunks), '\\');
-                if(Primitive::isNative($property['inner']))
-                  $property['inner']=Primitive::asBoxed($property['inner']);
-              }
-              else
-              {
-                $property['type']=reset($chunks);
-                if(Primitive::isNative($property['type']))
-                  $property['type']=Primitive::asBoxed($property['type']);
-              }
-            }
-          }
-
-          if($annotation instanceof Annotation_Name)
-            $property['name']=$annotation->value;
+          $object->$property=$data[$info['name']];
         }
-
-        if($serializer=static::getSerializerImplForType($property['type']))
-          $property['serializer']=$serializer;
-
-        $properties[$propertyName]=$property;
+        else
+        {
+          $o=new \ReflectionClass($t);
+          if($o->isSubclassOf('Components\\Value'))
+            $object->$property=$t::valueOf($data[$info['name']]);
+        }
       }
 
-      var_dump($properties);
-      return $properties;
+      // TODO Deep mapping / map arrays/objects ...
+
+      return $object;
     }
     //--------------------------------------------------------------------------
   }

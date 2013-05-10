@@ -57,78 +57,23 @@ namespace Components;
 
       self::$m_marshallerTypes[$mimeType_->name()]=$typeMarshaller_;
     }
-
-    /**
-     * Resolve type of responsible serializer for given type of object.
-     *
-     * @param string $type_
-     *
-     * @return string
-     *
-     * @throws Exception_IllegalArgument
-     */
-    public static function getSerializerForType($type_)
-    {
-      if(false===isset(self::$m_serializerInstances[$type_]))
-      {
-        if(false===isset(self::$m_serializerTypes[$type_]))
-        {
-          throw new Exception_IllegalArgument('components/marshaller', sprintf(
-            'Serialization of passed type is not supported [%s].', $type_
-          ));
-        }
-
-        $impl=self::$m_serializerTypes[$type_];
-
-        self::$m_serializerInstances[$type_]=new $impl();
-      }
-
-      return self::$m_serializerInstances[$type_];
-    }
-
-    /**
-     * Resolve cached instance of responsible serializer
-     * for given type of object.
-     *
-     * @param string $type_
-     *
-     * @return Components\Serializer
-     */
-    public static function getSerializerImplForType($type_)
-    {
-      if(false===isset(self::$m_serializerTypes[$type_]))
-        return null;
-
-      return self::$m_serializerTypes[$type_];
-    }
-
-    /**
-     * Register additional serializer implementations.
-     *
-     * @param string $type_
-     * @param "Components\Serializer" $serializer_
-     */
-    public static function registerSerializerImplForType($type_, $serializer_)
-    {
-      self::$m_serializerTypes[$type_]=$serializer_;
-    }
     //--------------------------------------------------------------------------
 
 
     // ACCESSORS
     /**
-     * @param Components\Serializable $object_
+     * @param mixed $object_
      *
      * @return string
      */
-    abstract public function marshal(Serializable $object_);
+    abstract public function marshal($object_);
     /**
      * @param string $data_
-     * @param "Components\Serializable" $type_
+     * @param string $type_
      *
-     * @return Components\Serializable
+     * @return mixed
      */
-    abstract public function unmarshal($data_, /** @var Components\Serializable */ $type_);
+    abstract public function unmarshal($data_, $type_);
     //--------------------------------------------------------------------------
 
 
@@ -136,16 +81,71 @@ namespace Components;
     private static $m_marshallerTypes=array(
       Io_MimeType::APPLICATION_JSON=>'Components\\Marshaller_Json'
     );
-    private static $m_marshallerInstances=array();
-    private static $m_serializerTypes=array(
-      Boolean::TYPE=>'Components\\Serializer_Primitive',
-      Character::TYPE=>'Components\\Serializer_Primitive',
-      Integer::TYPE=>'Components\\Serializer_Primitive',
-      Float::TYPE=>'Components\\Serializer_Primitive',
-      String::TYPE=>'Components\\Serializer_Primitive',
-      HashMap::TYPE=>'Components\\Serializer_Map',
+    private static $m_map=array(
+      HashMap::TYPE=>'Components\\Marshaller::mapHashmap',
+      HashMap::TYPE_NATIVE=>'Components\\Marshaller::mapArray'
     );
-    private static $m_serializerInstances=array();
+    private static $m_unmap=array(
+      HashMap::TYPE=>'Components\\Marshaller::unmapHashmap',
+      HashMap::TYPE_NATIVE=>'Components\\Marshaller::unmapArray'
+    );
+    private static $m_marshallerInstances=array();
+    //-----
+
+
+    protected function propertyMap($type_)
+    {
+      if($map=Cache::get('components/marshaller/json/map/'.md5($type_)))
+        return $map;
+
+      $annotations=Annotations::get($type_);
+
+      $map=array();
+      foreach($annotations->getPropertyAnnotations() as $propertyName=>$propertyAnnotations)
+      {
+        $property=array();
+        foreach($propertyAnnotations as $annotation)
+        {
+          if($annotation instanceof Annotation_Type)
+          {
+            if(false===strpos($annotation->value, '|'))
+            {
+              $property['type']=$annotation->value;
+              if(Primitive::isNative($property['type']))
+                $property['type']=Primitive::asBoxed($property['type']);
+            }
+            else
+            {
+              $chunks=explode('|', $annotation->value);
+              if(HashMap::TYPE_NATIVE===Primitive::asNative(ltrim(reset($chunks), '\\')))
+              {
+                $property['type']=HashMap::TYPE;
+                $property['args']=ltrim(end($chunks), '\\');
+                if(Primitive::isNative($property['args']))
+                  $property['args']=Primitive::asBoxed($property['args']);
+              }
+              else
+              {
+                $property['type']=reset($chunks);
+                if(Primitive::isNative($property['type']))
+                  $property['type']=Primitive::asBoxed($property['type']);
+              }
+            }
+          }
+
+          if($annotation instanceof Annotation_Name)
+            $property['name']=$annotation->value;
+          else
+            $property['name']=$propertyName;
+        }
+
+        $map[$propertyName]=$property;
+      }
+
+      Cache::set('components/marshaller/json/map/'.md5($type_), $map);
+
+      return $map;
+    }
     //--------------------------------------------------------------------------
   }
 ?>
