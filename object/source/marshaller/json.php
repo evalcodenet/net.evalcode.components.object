@@ -17,7 +17,7 @@ namespace Components;
   {
     /**
      * (non-PHPdoc)
-     * @see Components.Marshaller::marshal()
+     * @see Components\Marshaller::marshal()
      */
     public function marshal($object_)
     {
@@ -40,6 +40,7 @@ namespace Components;
         else if($object_->$property instanceof Value)
           $values[$info['name']]=$object_->$property->value();
 
+        // TODO Deep mapping / map arrays/objects ...
       }
 
       return json_encode($values);
@@ -47,7 +48,7 @@ namespace Components;
 
     /**
      * (non-PHPdoc)
-     * @see Components.Marshaller::unmarshal()
+     * @see Components\Marshaller::unmarshal()
      */
     public function unmarshal($data_, $type_)
     {

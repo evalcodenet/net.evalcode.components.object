@@ -16,9 +16,9 @@ namespace Components;
   {
     // STATIC ACCESSORS
     /**
-     * @param Components\Io_MimeType $mimeType_
+     * @param \Components\Io_MimeType $mimeType_
      *
-     * @return Components\Marshaller
+     * @return \Components\Marshaller
      */
     public static function forMimeType(Io_MimeType $mimeType_)
     {
@@ -29,7 +29,6 @@ namespace Components;
         );
       }
 
-      // fixed ...
       if(false===isset(self::$m_marshallerInstances[$mimeType_->name()]))
       {
         $type=self::$m_marshallerTypes[$mimeType_->name()];
