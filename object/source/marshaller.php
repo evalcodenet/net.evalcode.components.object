@@ -29,6 +29,7 @@ namespace Components;
         );
       }
 
+      // fixed ...
       if(false===isset(self::$m_marshallerInstances[$mimeType_->name()]))
       {
         $type=self::$m_marshallerTypes[$mimeType_->name()];
