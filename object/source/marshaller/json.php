@@ -40,7 +40,6 @@ namespace Components;
         else if($object_->$property instanceof Value)
           $values[$info['name']]=$object_->$property->value();
 
-        // TODO Deep mapping / map arrays/objects ...
       }
 
       return json_encode($values);
