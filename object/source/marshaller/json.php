@@ -43,8 +43,6 @@ namespace Components;
         // TODO Deep mapping / map arrays/objects ...
       }
 
-      printf('blaa');
-
       return json_encode($values);
     }
 
