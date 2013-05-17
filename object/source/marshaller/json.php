@@ -21,29 +21,17 @@ namespace Components;
      */
     public function marshal($object_)
     {
-      if(Primitive::isNative(gettype($object_)))
+      if(is_scalar($object_))
         return json_encode($object_);
-
       if($object_ instanceof Value)
         return json_encode($object_->value());
-
       if($object_ instanceof Serializable_Json)
         return $object_->serializeJson();
 
-      $type=get_class($object_);
+      if(is_object($object_))
+        return json_encode($this->mapObject($object_, get_class($object_)));
 
-      $values=array();
-      foreach($this->propertyMap($type) as $property=>$info)
-      {
-        if(Primitive::isNative($info['type']))
-          $values[$info['name']]=$object_->$property;
-        else if($object_->$property instanceof Value)
-          $values[$info['name']]=$object_->$property->value();
-
-        // TODO Deep mapping / map arrays/objects ...
-      }
-
-      return json_encode($values);
+      return json_encode($mapped=$this->mapArray($object_));
     }
 
     /**
@@ -91,6 +79,54 @@ namespace Components;
       // TODO Deep mapping / map arrays/objects ...
 
       return $object;
+    }
+    //--------------------------------------------------------------------------
+
+
+    // IMPLEMENTATION
+    private static $m_mapper=array();
+    //-----
+
+
+    protected function mapArray(array $array_)
+    {
+      $data=array();
+      foreach($array_ as $key=>$value)
+      {
+        if(is_scalar($value))
+          $data[$key]=$value;
+        else if(is_array($value))
+          $data[$key]=$this->mapArray($value);
+        else
+          $data[$key]=$this->mapObject($value, get_class($value));
+      }
+
+      return $data;
+    }
+
+    protected function mapObject($object_, $type_)
+    {
+      if($object_ instanceof Collection)
+        return $this->mapArray($object_->arrayValue());
+
+      $map=$this->propertyMap($type_);
+
+      $data=array();
+      foreach($map as $property=>$info)
+      {
+        $value=$object_->$property;
+
+        if(is_scalar($value))
+          $data[$info['name']]=$value;
+        else if($value instanceof Value)
+          $data[$info['name']]=$value->value();
+        else if(is_array($value))
+          $data[$info['name']]=$this->mapArray($value);
+        else
+          $data[$info['name']]=$this->mapObject($value, $info['type']);
+      }
+
+      return $data;
     }
     //--------------------------------------------------------------------------
   }

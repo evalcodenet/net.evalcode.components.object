@@ -32,6 +32,7 @@ namespace Components;
       if(false===isset(self::$m_marshallerInstances[$mimeType_->name()]))
       {
         $type=self::$m_marshallerTypes[$mimeType_->name()];
+
         self::$m_marshallerInstances[$mimeType_->name()]=new $type();
       }
 
@@ -103,7 +104,10 @@ namespace Components;
       $map=array();
       foreach($annotations->getPropertyAnnotations() as $propertyName=>$propertyAnnotations)
       {
-        $property=array();
+        $property=array(
+          'name'=>$propertyName
+        );
+
         foreach($propertyAnnotations as $annotation)
         {
           if($annotation instanceof Annotation_Type)
@@ -135,8 +139,6 @@ namespace Components;
 
           if($annotation instanceof Annotation_Name)
             $property['name']=$annotation->value;
-          else
-            $property['name']=$propertyName;
         }
 
         $map[$propertyName]=$property;
