@@ -17,20 +17,31 @@ namespace Components;
     // ACCESSORS/MUTATORS
     /**
      * @param mixed $object_
-     *
-     * @return array|scalar
-     *
-     * @throws Exception_IllegalArgument
+     * @param array|scalar $data_
      */
-    public function map($object_)
+    public function hydrate($object_, array $data_)
     {
-      if(is_object($object_))
-        return $this->mapObjectOfType($object_, get_class($object_));
+      $type=get_class($object_);
+      foreach($this->propertyMap($type) as $property=>$info)
+      {
+        if(false===isset($data_[$info['name']]))
+          continue;
 
-      if(is_array($object_))
-        return $this->mapObjectArray($object_);
+        $t=$info['type'];
 
-      throw new Exception_IllegalArgument('object/mapper', 'Can not map given argument to array.');
+        if(Primitive::isNative($t))
+        {
+          $object_->$property=$data_[$info['name']];
+        }
+        else
+        {
+          $o=new \ReflectionClass($t);
+          if($o->isSubclassOf('Components\\Value'))
+            $object_->$property=$t::valueOf($data_[$info['name']]);
+        }
+      }
+
+      // TODO Recursive mapping ...
     }
 
     /**
@@ -39,7 +50,7 @@ namespace Components;
      *
      * @return mixed
      */
-    public function unmap(array $data_, $type_)
+    public function hydrateForType($type_, array $data_)
     {
       $object=new $type_();
       foreach($this->propertyMap($type_) as $property=>$info)
@@ -66,12 +77,23 @@ namespace Components;
       return $object;
     }
 
+    public function dehydrate($object_)
+    {
+      if(is_object($object_))
+        return $this->dehydrateObjectOfType($object_, get_class($object_));
+
+      if(is_array($object_))
+        return $this->dehydrateObjectArray($object_);
+
+      throw new Exception_IllegalArgument('object/mapper', 'Can not map given argument to array.');
+    }
+
     /**
      * @param array|mixed $array_
      *
      * @return array|scalar
      */
-    public function mapObjectArray(array $array_)
+    public function dehydrateObjectArray(array $array_)
     {
       $data=array();
       foreach($array_ as $key=>$value)
@@ -79,9 +101,9 @@ namespace Components;
         if(is_scalar($value) || is_null($value))
           $data[$key]=$value;
         else if(is_array($value))
-          $data[$key]=$this->mapObjectArray($value);
+          $data[$key]=$this->dehydrateObjectArray($value);
         else
-          $data[$key]=$this->mapObjectOfType($value, get_class($value));
+          $data[$key]=$this->dehydrateObjectOfType($value, get_class($value));
       }
 
       return $data;
@@ -93,10 +115,10 @@ namespace Components;
      *
      * @return array|scalar
      */
-    public function mapObjectOfType($object_, $type_)
+    public function dehydrateObjectOfType($object_, $type_)
     {
       if($object_ instanceof Collection)
-        return $this->mapObjectArray($object_->arrayValue());
+        return $this->dehydrateObjectArray($object_->arrayValue());
 
       $map=$this->propertyMap($type_);
 
@@ -110,9 +132,9 @@ namespace Components;
         else if($value instanceof Value)
           $data[$info['name']]=$value->value();
         else if(is_array($value))
-          $data[$info['name']]=$this->mapObjectArray($value);
+          $data[$info['name']]=$this->dehydrateObjectArray($value);
         else
-          $data[$info['name']]=$this->mapObjectOfType($value, $info['type']);
+          $data[$info['name']]=$this->dehydrateObjectOfType($value, $info['type']);
       }
 
       return $data;
@@ -130,19 +152,26 @@ namespace Components;
       HashMap::TYPE=>'Components\\Object_Mapper::unmapHashmap',
       HashMap::TYPE_NATIVE=>'Components\\Object_Mapper::unmapArray'
     );
+    private static $m_propertyMap=array();
     //-----
 
 
     protected function propertyMap($type_)
     {
+      if(isset(self::$m_propertyMap[$type_]))
+        return self::$m_propertyMap[$type_];
+
       if($map=Cache::get('components/object/mapper/'.md5($type_)))
-        return $map;
+        return self::$m_propertyMap[$type_]=$map;
 
       $annotations=Annotations::get($type_);
 
       $map=array();
       foreach($annotations->getPropertyAnnotations() as $propertyName=>$propertyAnnotations)
       {
+        if(isset($propertyAnnotations[Annotation_Transient::NAME]))
+          continue;
+
         $property=array(
           'name'=>$propertyName
         );
@@ -185,7 +214,7 @@ namespace Components;
 
       Cache::set('components/object/mapper/'.md5($type_), $map);
 
-      return $map;
+      return self::$m_propertyMap[$type_]=$map;
     }
     //--------------------------------------------------------------------------
   }

@@ -37,9 +37,9 @@ namespace Components;
         return $object_->serializeJson();
 
       if(is_object($object_))
-        return json_encode($this->m_mapper->mapObjectOfType($object_, get_class($object_)));
+        return json_encode($this->m_mapper->dehydrateObjectOfType($object_, get_class($object_)));
 
-      return json_encode($this->m_mapper->mapObjectArray($object_));
+      return json_encode($this->m_mapper->dehydrateObjectArray($object_));
     }
 
     /**
@@ -62,7 +62,7 @@ namespace Components;
         return $instance->unserializeJson($data_);
       }
 
-      return $this->m_mapper->unmap(json_decode($data_, true), $type_);
+      return $this->m_mapper->hydrateForType($type_, json_decode($data_, true));
     }
     //--------------------------------------------------------------------------
 

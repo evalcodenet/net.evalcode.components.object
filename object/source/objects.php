@@ -17,15 +17,14 @@ namespace Components;
     // STATIC ACCESSORS
     /**
      * @param mixed $object_
-     *
-     * @return array|scalar
+     * @param array|scalar $data_
      */
-    public static function toArray($object_)
+    public static function hydrate($object_, array $data_)
     {
       if(null===self::$m_mapper)
         self::$m_mapper=new Object_Mapper();
 
-      return self::$m_mapper->map($object_);
+      return self::$m_mapper->hydrate($object_, $data_);
     }
 
     /**
@@ -34,12 +33,25 @@ namespace Components;
      *
      * @return mixed
      */
-    public static function forArray(array $data_, $type_)
+    public static function hydrateForType($type_, array $data_)
     {
       if(null===self::$m_mapper)
         self::$m_mapper=new Object_Mapper();
 
-      return self::$m_mapper->unmap($data_, $type_);
+      return self::$m_mapper->hydrateForType($type_, $data_);
+    }
+
+    /**
+     * @param mixed $object_
+     *
+     * @return array|scalar
+     */
+    public static function dehydrate($object_)
+    {
+      if(null===self::$m_mapper)
+        self::$m_mapper=new Object_Mapper();
+
+      return self::$m_mapper->dehydrate($object_);
     }
 
     /**
