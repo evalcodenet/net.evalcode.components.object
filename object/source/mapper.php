@@ -21,23 +21,29 @@ namespace Components;
      */
     public function hydrate($object_, array $data_)
     {
-      $type=get_class($object_);
-      foreach($this->propertyMap($type) as $property=>$info)
+      if($object_ instanceof Object_Mappable)
+        $properties=$object_->properties();
+      else
+        $properties=Object_Properties::forType(get_class($object_));
+
+      foreach($properties->propertyNames() as $propertyName)
       {
-        if(false===isset($data_[$info['name']]))
+        /* @var $property \Components\Object_Property */
+        $property=$properties->$propertyName;
+        if(false===isset($data_[$property->nameMapped]))
           continue;
 
-        $t=$info['type'];
+        $t=$property->type;
 
         if(Primitive::isNative($t))
         {
-          $object_->$property=$data_[$info['name']];
+          $object_->$property=$data_[$property->nameMapped];
         }
         else
         {
           $o=new \ReflectionClass($t);
           if($o->isSubclassOf('Components\\Value'))
-            $object_->$property=$t::valueOf($data_[$info['name']]);
+            $object_->$property=$t::valueOf($data_[$property->nameMapped]);
         }
       }
 
@@ -53,22 +59,30 @@ namespace Components;
     public function hydrateForType($type_, array $data_)
     {
       $object=new $type_();
-      foreach($this->propertyMap($type_) as $property=>$info)
+
+      if($object instanceof Object_Mappable)
+        $properties=$object->properties();
+      else
+        $properties=Object_Properties::forType($type_);
+
+      foreach($properties->propertyNames() as $propertyName)
       {
-        if(false===isset($data_[$info['name']]))
+        /* @var $property \Components\Object_Property */
+        $property=$properties->$propertyName;
+        if(false===isset($data_[$property->nameMapped]))
           continue;
 
-        $t=$info['type'];
+        $t=$property->type;
 
         if(Primitive::isNative($t))
         {
-          $object->$property=$data_[$info['name']];
+          $object->$property=$data_[$property->nameMapped];
         }
         else
         {
           $o=new \ReflectionClass($t);
           if($o->isSubclassOf('Components\\Value'))
-            $object->$property=$t::valueOf($data_[$info['name']]);
+            $object->$property=$t::valueOf($data_[$property->nameMapped]);
         }
       }
 
@@ -120,21 +134,26 @@ namespace Components;
       if($object_ instanceof Collection)
         return $this->dehydrateObjectArray($object_->arrayValue());
 
-      $map=$this->propertyMap($type_);
+      if($object_ instanceof Object_Mappable)
+        $properties=$object_->properties();
+      else
+        $properties=Object_Properties::forType($type_);
 
       $data=array();
-      foreach($map as $property=>$info)
+      foreach($properties->propertyNames() as $propertyName)
       {
-        $value=$object_->$property;
+        /* @var $property \Components\Object_Property */
+        $property=$properties->$propertyName;
+        $value=$object_->{$property->name};
 
         if(is_scalar($value) || is_null($value))
-          $data[$info['name']]=$value;
+          $data[$property->nameMapped]=$value;
         else if($value instanceof Value)
-          $data[$info['name']]=$value->value();
+          $data[$property->nameMapped]=$value->value();
         else if(is_array($value))
-          $data[$info['name']]=$this->dehydrateObjectArray($value);
+          $data[$property->nameMapped]=$this->dehydrateObjectArray($value);
         else
-          $data[$info['name']]=$this->dehydrateObjectOfType($value, $info['type']);
+          $data[$property->nameMapped]=$this->dehydrateObjectOfType($value, $property->type);
       }
 
       return $data;
@@ -152,70 +171,6 @@ namespace Components;
       HashMap::TYPE=>'Components\\Object_Mapper::unmapHashmap',
       HashMap::TYPE_NATIVE=>'Components\\Object_Mapper::unmapArray'
     );
-    private static $m_propertyMap=array();
-    //-----
-
-
-    protected function propertyMap($type_)
-    {
-      if(isset(self::$m_propertyMap[$type_]))
-        return self::$m_propertyMap[$type_];
-
-      if($map=Cache::get('components/object/mapper/'.md5($type_)))
-        return self::$m_propertyMap[$type_]=$map;
-
-      $annotations=Annotations::get($type_);
-
-      $map=array();
-      foreach($annotations->getPropertyAnnotations() as $propertyName=>$propertyAnnotations)
-      {
-        if(isset($propertyAnnotations[Annotation_Transient::NAME]))
-          continue;
-
-        $property=array(
-          'name'=>$propertyName
-        );
-
-        foreach($propertyAnnotations as $annotation)
-        {
-          if($annotation instanceof Annotation_Type)
-          {
-            if(false===strpos($annotation->value, '|'))
-            {
-              $property['type']=$annotation->value;
-              if(Primitive::isNative($property['type']))
-                $property['type']=Primitive::asBoxed($property['type']);
-            }
-            else
-            {
-              $chunks=explode('|', $annotation->value);
-              if(HashMap::TYPE_NATIVE===Primitive::asNative(ltrim(reset($chunks), '\\')))
-              {
-                $property['type']=HashMap::TYPE;
-                $property['args']=ltrim(end($chunks), '\\');
-                if(Primitive::isNative($property['args']))
-                  $property['args']=Primitive::asBoxed($property['args']);
-              }
-              else
-              {
-                $property['type']=reset($chunks);
-                if(Primitive::isNative($property['type']))
-                  $property['type']=Primitive::asBoxed($property['type']);
-              }
-            }
-          }
-
-          if($annotation instanceof Annotation_Name)
-            $property['name']=$annotation->value;
-        }
-
-        $map[$propertyName]=$property;
-      }
-
-      Cache::set('components/object/mapper/'.md5($type_), $map);
-
-      return self::$m_propertyMap[$type_]=$map;
-    }
     //--------------------------------------------------------------------------
   }
 ?>
