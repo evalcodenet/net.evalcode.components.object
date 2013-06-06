@@ -16,11 +16,11 @@ namespace Components;
   {
     // STATIC ACCESSORS
     /**
-     * @param \Components\Io_MimeType $mimeType_
+     * @param \Components\Io_Mimetype $mimeType_
      *
      * @return \Components\Object_Marshaller
      */
-    public static function forMimeType(Io_MimeType $mimeType_)
+    public static function forMimetype(Io_Mimetype $mimeType_)
     {
       if(false===isset(self::$m_marshallerTypes[$mimeType_->name()]))
       {
@@ -42,12 +42,12 @@ namespace Components;
     /**
      * Register additional marshaller implementations.
      *
-     * @param Io_MimeType $mimeType_
+     * @param Io_Mimetype $mimeType_
      * @param string $typeMarshaller_
      *
      * @throws Exception_IllegalArgument
      */
-    public static function registerForMimeType(Io_MimeType $mimeType_, $typeMarshaller_)
+    public static function registerForMimetype(Io_Mimetype $mimeType_, $typeMarshaller_)
     {
       if(!$typeMarshaller_ instanceof self)
       {
@@ -81,7 +81,7 @@ namespace Components;
 
     // IMPLEMENTATION
     private static $m_marshallerTypes=array(
-      Io_MimeType::APPLICATION_JSON=>'Components\\Object_Marshaller_Json'
+      Io_Mimetype::APPLICATION_JSON=>'Components\\Object_Marshaller_Json'
     );
     private static $m_marshallerInstances=array();
     //--------------------------------------------------------------------------

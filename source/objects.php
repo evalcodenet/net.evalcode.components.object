@@ -61,7 +61,7 @@ namespace Components;
      */
     public static function toJson($object_)
     {
-      return Object_Marshaller::forMimeType(Io_MimeType::APPLICATION_JSON())->marshal($object_);
+      return Object_Marshaller::forMimetype(Io_Mimetype::APPLICATION_JSON())->marshal($object_);
     }
 
     /**
@@ -72,24 +72,24 @@ namespace Components;
      */
     public static function forJson($json_, $type_)
     {
-      return Object_Marshaller::forMimeType(Io_MimeType::APPLICATION_JSON())->unmarshal($json_, $type_);
+      return Object_Marshaller::forMimetype(Io_Mimetype::APPLICATION_JSON())->unmarshal($json_, $type_);
     }
 
     /**
-     * @param \Components\Io_MimeType $mimeType_
+     * @param \Components\Io_Mimetype $mimeType_
      * @param mixed $object_
      *
      * @return string
      *
      * @throws \Components\Exception_NotSupported
      */
-    public static function marshal(Io_MimeType $mimeType_, $object_)
+    public static function marshal(Io_Mimetype $mimeType_, $object_)
     {
-      return Object_Marshaller::forMimeType($mimeType_)->marshal($object_);
+      return Object_Marshaller::forMimetype($mimeType_)->marshal($object_);
     }
 
     /**
-     * @param \Components\Io_MimeType $mimeType_
+     * @param \Components\Io_Mimetype $mimeType_
      * @param string $data_
      * @param string $type_
      *
@@ -97,9 +97,9 @@ namespace Components;
      *
      * @throws \Components\Exception_NotSupported
      */
-    public static function unmarshal(Io_MimeType $mimeType_, $data_, $type_)
+    public static function unmarshal(Io_Mimetype $mimeType_, $data_, $type_)
     {
-      return Object_Marshaller::forMimeType($mimeType_)->unmarshal($data_, $type_);
+      return Object_Marshaller::forMimetype($mimeType_)->unmarshal($data_, $type_);
     }
 
     /**
