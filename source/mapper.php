@@ -131,6 +131,8 @@ namespace Components;
      */
     public function dehydrateObjectOfType($object_, $type_)
     {
+      if($object_ instanceof Value)
+        return $object_->value();
       if($object_ instanceof Collection)
         return $this->dehydrateObjectArray($object_->arrayValue());
 
