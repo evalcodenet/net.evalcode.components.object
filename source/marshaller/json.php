@@ -23,9 +23,7 @@ namespace Components;
     //--------------------------------------------------------------------------
 
 
-    /**
-     * (non-PHPdoc)
-     * @see Components\Marshaller::marshal()
+    /**     * @see Components\Marshaller::marshal() Components\Marshaller::marshal()
      */
     public function marshal($object_)
     {
@@ -42,9 +40,7 @@ namespace Components;
       return json_encode($this->m_mapper->dehydrateObjectArray($object_));
     }
 
-    /**
-     * (non-PHPdoc)
-     * @see Components\Marshaller::unmarshal()
+    /**     * @see Components\Marshaller::unmarshal() Components\Marshaller::unmarshal()
      */
     public function unmarshal($data_, $type_)
     {
