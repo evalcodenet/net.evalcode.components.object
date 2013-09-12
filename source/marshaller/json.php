@@ -7,8 +7,8 @@ namespace Components;
   /**
    * Object_Marshaller_Json
    *
-   * @package net.evalcode.components
-   * @subpackage object.marshaller
+   * @package net.evalcode.components.object
+   * @subpackage marshaller
    *
    * @author evalcode.net
    */
@@ -23,7 +23,8 @@ namespace Components;
     //--------------------------------------------------------------------------
 
 
-    /**     * @see Components\Marshaller::marshal() Components\Marshaller::marshal()
+    /**
+     * @see \Components\Marshaller::marshal() \Components\Marshaller::marshal()
      */
     public function marshal($object_)
     {
@@ -40,7 +41,8 @@ namespace Components;
       return json_encode($this->m_mapper->dehydrateObjectArray($object_));
     }
 
-    /**     * @see Components\Marshaller::unmarshal() Components\Marshaller::unmarshal()
+    /**
+     * @see \Components\Marshaller::unmarshal() \Components\Marshaller::unmarshal()
      */
     public function unmarshal($data_, $type_)
     {

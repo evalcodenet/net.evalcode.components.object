@@ -7,7 +7,7 @@ namespace Components;
   /**
    * Object_Properties
    *
-   * @package net.evalcode.components
+   * @package net.evalcode.components.object
    * @subpackage object
    *
    * @author evalcode.net
@@ -88,7 +88,7 @@ namespace Components;
         {
           if($annotation instanceof Annotation_Type)
           {
-            if(false===strpos($annotation->value, '|'))
+            if(false===strpos($annotation->value, '['))
             {
               $property['type']=$annotation->value;
               if(Primitive::isNative($property['type']))
@@ -96,19 +96,22 @@ namespace Components;
             }
             else
             {
-              $chunks=explode('|', $annotation->value);
-              if(HashMap::TYPE_NATIVE===Primitive::asNative(ltrim(reset($chunks), '\\')))
+              if(false!==($pos=strpos($annotation->value, '[]')))
               {
                 $property['type']=HashMap::TYPE;
-                $property['args']=ltrim(end($chunks), '\\');
+                $property['args']=ltrim(substr($annotation->value, $pos), '\\');
                 if(Primitive::isNative($property['args']))
                   $property['args']=Primitive::asBoxed($property['args']);
               }
               else
               {
-                $property['type']=reset($chunks);
+                $annotationValue=rtrim($annotation->value, ']');
+                $property['type']=ltrm(substr($annotationValue, 0, strpos($annotationValue, '[')), '\\');
+                $property['args']=ltrim(substr($annotationValue, strpos($annotationValue, '[')+1), '\\');
                 if(Primitive::isNative($property['type']))
                   $property['type']=Primitive::asBoxed($property['type']);
+                if(Primitive::isNative($property['args']))
+                  $property['args']=Primitive::asBoxed($property['args']);
               }
             }
           }
@@ -127,9 +130,9 @@ namespace Components;
     //--------------------------------------------------------------------------
 
 
-    // ACCESSORS/MUTATORS
+    // ACCESSORS
     /**
-     * @return array|string
+     * @return string[]
      */
     public function propertyNames()
     {

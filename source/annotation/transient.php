@@ -7,10 +7,12 @@ namespace Components;
   /**
    * Annotation_Transient
    *
-   * @package net.evalcode.components
+   * @package net.evalcode.components.object
    * @subpackage annotation
    *
    * @author evalcode.net
+   *
+   * @api
    */
   class Annotation_Transient extends Annotation
   {
