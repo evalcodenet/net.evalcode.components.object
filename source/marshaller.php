@@ -7,10 +7,12 @@ namespace Components;
   /**
    * Object_Marshaller
    *
-   * @package net.evalcode.components
+   * @package net.evalcode.components.object
    * @subpackage object
    *
    * @author evalcode.net
+   *
+   * @api
    */
   abstract class Object_Marshaller
   {

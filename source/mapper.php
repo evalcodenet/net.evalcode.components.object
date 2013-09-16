@@ -7,17 +7,19 @@ namespace Components;
   /**
    * Object_Mapper
    *
-   * @package net.evalcode.components
+   * @package net.evalcode.components.object
    * @subpackage object
    *
    * @author evalcode.net
+   *
+   * @api
    */
   class Object_Mapper
   {
-    // ACCESSORS/MUTATORS
+    // ACCESSORS
     /**
      * @param mixed $object_
-     * @param array|scalar $data_
+     * @param scalar[] $data_
      */
     public function hydrate($object_, array $data_)
     {
@@ -51,7 +53,7 @@ namespace Components;
     }
 
     /**
-     * @param array|scalar $data_
+     * @param scalar[] $data_
      * @param string $type_
      *
      * @return mixed
@@ -103,9 +105,9 @@ namespace Components;
     }
 
     /**
-     * @param array|mixed $array_
+     * @param array $array_
      *
-     * @return array|scalar
+     * @return scalar[]
      */
     public function dehydrateObjectArray(array $array_)
     {
@@ -127,7 +129,7 @@ namespace Components;
      * @param mixed $object_
      * @param string $type_
      *
-     * @return array|scalar
+     * @return scalar[]
      */
     public function dehydrateObjectOfType($object_, $type_)
     {
@@ -161,7 +163,6 @@ namespace Components;
       return $data;
     }
     //--------------------------------------------------------------------------
-
 
 
     // IMPLEMENTATION

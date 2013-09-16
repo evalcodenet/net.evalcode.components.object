@@ -7,8 +7,7 @@ namespace Components;
   /**
    * Object_Property
    *
-   * @package net.evalcode.components
-   * @subpackage object
+   * @package net.evalcode.components.object
    *
    * @author evalcode.net
    */
@@ -55,7 +54,7 @@ namespace Components;
     //--------------------------------------------------------------------------
 
 
-    // ACCESSORS/MUTATORS
+    // ACCESSORS
     /**
      * @param string $value_
      *
@@ -118,10 +117,9 @@ namespace Components;
     //--------------------------------------------------------------------------
 
 
-    // OVERRIDES/IMPLEMENTS
+    // OVERRIDES
     /**
-     * (non-PHPdoc)
-     * @see \Components\Serializable_Php::__sleep()
+     * @see \Components\Serializable_Php::__sleep() \Components\Serializable_Php::__sleep()
      */
     public function __sleep()
     {
@@ -134,8 +132,7 @@ namespace Components;
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Components\Serializable_Php::__wakeup()
+     * @see \Components\Serializable_Php::__wakeup() \Components\Serializable_Php::__wakeup()
      */
     public function __wakeup()
     {
@@ -143,8 +140,7 @@ namespace Components;
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Components\Serializable::serialVersionUid()
+     * @see \Components\Serializable::serialVersionUid() \Components\Serializable::serialVersionUid()
      */
     public function serialVersionUid()
     {
@@ -152,8 +148,7 @@ namespace Components;
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Components\Object::hashCode()
+     * @see \Components\Object::hashCode() \Components\Object::hashCode()
      */
     public function hashCode()
     {
@@ -161,8 +156,7 @@ namespace Components;
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Components\Object::equals()
+     * @see \Components\Object::equals() \Components\Object::equals()
      */
     public function equals($object_)
     {
@@ -178,8 +172,7 @@ namespace Components;
     }
 
     /**
-     * (non-PHPdoc)
-     * @see \Components\Object::__toString()
+     * @see \Components\Object::__toString() \Components\Object::__toString()
      */
     public function __toString()
     {
