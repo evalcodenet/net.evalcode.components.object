@@ -47,11 +47,15 @@ namespace Components;
     public function unmarshal($data_, $type_)
     {
       if(Primitive::isNative($type_))
-        return json_decode($data_);
+      {
+        $type=Primitive::asBoxed($type_);
+
+        return $type::cast($data_);
+      }
 
       $type=new \ReflectionClass($type_);
       if($type->isSubclassOf('Components\\Value'))
-        return $type_::valueOf(json_decode($data_));
+        return $type_::valueOf($data_);
 
       if($type->isSubclassOf('Components\\Serializable_Json'))
       {
