@@ -106,7 +106,7 @@ namespace Components;
               else
               {
                 $annotationValue=rtrim($annotation->value, ']');
-                $property['type']=ltrm(substr($annotationValue, 0, strpos($annotationValue, '[')), '\\');
+                $property['type']=ltrim(substr($annotationValue, 0, strpos($annotationValue, '[')), '\\');
                 $property['args']=ltrim(substr($annotationValue, strpos($annotationValue, '[')+1), '\\');
                 if(Primitive::isNative($property['type']))
                   $property['type']=Primitive::asBoxed($property['type']);
