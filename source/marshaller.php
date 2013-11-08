@@ -85,7 +85,7 @@ namespace Components;
     private static $m_marshallerTypes=array(
       Io_Mimetype::APPLICATION_JSON=>'Components\\Object_Marshaller_Json'
     );
-    private static $m_marshallerInstances=array();
+    private static $m_marshallerInstances=[];
     //--------------------------------------------------------------------------
   }
 ?>

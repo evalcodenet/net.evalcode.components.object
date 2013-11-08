@@ -71,7 +71,7 @@ namespace Components;
 
       $annotations=Annotations::get($type_);
 
-      $map=array();
+      $map=[];
       foreach($annotations->getPropertyAnnotations() as $propertyName=>$propertyAnnotations)
       {
         if(isset($propertyAnnotations[Annotation_Transient::NAME]))
@@ -157,7 +157,7 @@ namespace Components;
 
 
     // IMPLEMENTATION
-    private static $m_cache=array();
+    private static $m_cache=[];
     //--------------------------------------------------------------------------
   }
 ?>

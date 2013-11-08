@@ -111,7 +111,7 @@ namespace Components;
      */
     public function dehydrateObjectArray(array $array_)
     {
-      $data=array();
+      $data=[];
       foreach($array_ as $key=>$value)
       {
         if(is_scalar($value) || is_null($value))
@@ -143,7 +143,7 @@ namespace Components;
       else
         $properties=Object_Properties::forType($type_);
 
-      $data=array();
+      $data=[];
       foreach($properties->propertyNames() as $propertyName)
       {
         /* @var $property \Components\Object_Property */
