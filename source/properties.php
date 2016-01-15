@@ -25,6 +25,8 @@ namespace Components;
     // CONSTRUCTION
     public function __construct($type_)
     {
+      parent::__construct();
+
       $this->type=$type_;
     }
     //--------------------------------------------------------------------------

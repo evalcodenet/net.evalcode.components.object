@@ -201,7 +201,7 @@ namespace Components;
     {
       return sprintf('%s@%s{%s}',
         get_class($object_),
-        object_hash($object_),
+        \math\hasho($object_),
         Arrays::toString(get_object_vars($object_))
       );
     }
